@@ -10,6 +10,8 @@
 #include "actorA.h"
 #include "bsp.h"
 
+#include "util.h"
+
 //Q_DEFINE_THIS_FILE
 
 QEvt * ev;
@@ -20,7 +22,7 @@ typedef struct {     /* the active object */
     QActive super;   /* inherit QActive */
 
     QTimeEvt timeEvt; /* private time event generator */
-
+    int time_sec;
     int cnt;
 } actorA_t;
 
@@ -56,6 +58,7 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         }
         case TIMEOUT_SIG: {
         	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+        	Digit_Number(me->time_sec++);
             status = Q_HANDLED();
             break;
         }
