@@ -13,6 +13,9 @@ enum BlinkySignals {
 	EV_SIG,
 	MAX_PUB_SIG,          /* the last published signal */
     TIMEOUT_SIG,
+	TIMEOUT_SIG1,
+	ROT_UP_SIG,
+	ROT_DN_SIG,
     MAX_SIG               /* the last signal */
 };
 

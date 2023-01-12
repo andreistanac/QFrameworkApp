@@ -103,4 +103,43 @@ void Buzz_SetFreq(uint32_t freq) {
 	TIM4->CCR3 = freq;
 }
 
+uint8_t Rot_Read(void) {
+
+	uint8_t ret = 0;
+
+	timer_enc++;
+
+	static uint8_t key2 = 1, key3 = 1, key2_prev = 1, key3_prev = 1;
+
+	key2 = HAL_GPIO_ReadPin(K2_GPIO_Port, K2_Pin);
+	key3 = HAL_GPIO_ReadPin(K3_GPIO_Port, K3_Pin);
+
+	if(key2 ^ key2_prev) {
+		timer_key2 = timer_enc;
+	} else if(key3 ^ key3_prev) {
+		timer_key3 = timer_enc;
+	}
+
+	key2_prev = key2;
+	key3_prev = key3;
+
+	if (timer_key2 != 0 && abs(timer_key3 - timer_key2) < 11) {
+		// e.sig = (timer_key3 > timer_key2) + ROT_UP_SIG;
+
+		if (timer_key3 > timer_key2) {
+			// e.sig = ROT_UP_SIG;
+			ret = 2;
+		} else {
+			// e.sig = ROT_DN_SIG;
+			ret = 3;
+		}
+
+		timer_key2 = 0;
+		timer_key3 = 0;
+	}
+
+	return ret;
+
+}
+
 

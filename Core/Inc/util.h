@@ -23,4 +23,6 @@ void Buzz_Off(void);
 
 void Buzz_SetFreq(uint32_t freq);
 
+uint8_t Rot_Read(void);
+
 #endif /* INC_UTIL_H_ */
