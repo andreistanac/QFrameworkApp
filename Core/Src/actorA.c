@@ -45,6 +45,7 @@ QState actorA_initial(actorA_t * const me, QEvt const * const e) {
 
     /* arm the time event to expire in half a second and every half second */
     QTimeEvt_armX(&me->timeEvt, BSP_TICKS_PER_SEC/2U, BSP_TICKS_PER_SEC/2U);
+    me->time_sec = 0;
     return Q_TRAN(&actorA_S00);
 }
 
@@ -59,6 +60,13 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         case TIMEOUT_SIG: {
         	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
         	Digit_Number(me->time_sec++);
+
+        	if (me->time_sec % 2 ) {
+        		Buzz_On();
+        	} else {
+        		Buzz_Off();
+        	}
+
             status = Q_HANDLED();
             break;
         }

@@ -17,4 +17,10 @@ void Digit_Number(uint16_t number);
 void Digit_NumberPos(uint8_t number, uint8_t pos);
 void Digit_SymolPos(uint8_t value, uint8_t pos);
 
+void Buzz_On(void);
+
+void Buzz_Off(void);
+
+void Buzz_SetFreq(uint32_t freq);
+
 #endif /* INC_UTIL_H_ */

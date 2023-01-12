@@ -90,3 +90,17 @@ static void Digit_Update(uint16_t data) {
 	HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_RESET);
 }
 
+void Buzz_On(void) {
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+}
+
+void Buzz_Off(void) {
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_3);
+}
+
+void Buzz_SetFreq(uint32_t freq) {
+	TIM4->ARR = freq;
+	TIM4->CCR3 = freq;
+}
+
+
