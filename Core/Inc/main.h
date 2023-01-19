@@ -70,6 +70,8 @@ void Error_Handler(void);
 #define K3_GPIO_Port GPIOB
 #define CS_Pin GPIO_PIN_2
 #define CS_GPIO_Port GPIOB
+#define ROTB_Pin GPIO_PIN_10
+#define ROTB_GPIO_Port GPIOE
 #define RST_Pin GPIO_PIN_12
 #define RST_GPIO_Port GPIOE
 #define SDI_Pin GPIO_PIN_5

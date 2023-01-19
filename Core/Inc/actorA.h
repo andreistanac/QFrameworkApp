@@ -16,6 +16,7 @@ enum BlinkySignals {
 	TIMEOUT_SIG1,
 	ROT_UP_SIG,
 	ROT_DN_SIG,
+	ROT_BTN_SIG,
     MAX_SIG               /* the last signal */
 };
 

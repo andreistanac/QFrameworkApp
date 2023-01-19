@@ -85,6 +85,7 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         	HAL_I2C_Master_Receive(&hi2c2, 0x68 << 1, rx_data , 1, 10);
 
         	Digit_Number(rx_data[0]);
+        	// TBD : value 0...255 printed on digits 0 ... 99 !
 
             status = Q_HANDLED();
             break;
@@ -92,6 +93,17 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
 
         case TIMEOUT_SIG1: {
         	uint8_t rot = Rot_Read();
+
+        	static uint8_t btn_prev, btn;
+
+        	btn = HAL_GPIO_ReadPin(ROTB_GPIO_Port, ROTB_Pin);
+
+        	if (btn ^ btn_prev) {
+        	    ev =  Q_NEW(QEvt, ROT_BTN_SIG);
+        	    QActive_post_((QActive *)me, ev, QF_NO_MARGIN, NULL);
+        	}
+
+        	btn_prev = btn;
 
         	if (rot == 2) {
         	    ev =  Q_NEW(QEvt, ROT_UP_SIG);
@@ -101,6 +113,18 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         	    QActive_post_((QActive *)me, ev, QF_NO_MARGIN, NULL);
         	}
 
+            status = Q_HANDLED();
+            break;
+        }
+
+        case ROT_BTN_SIG: {
+        	static uint8_t x = 0;
+        	x++;
+        	if (x % 2) {
+        		Buzz_On();
+        	} else {
+        		Buzz_Off();
+        	}
             status = Q_HANDLED();
             break;
         }
