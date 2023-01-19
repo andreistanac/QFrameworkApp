@@ -65,12 +65,26 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         }
         case TIMEOUT_SIG: {
         	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+        	/*
         	me->time_sec++;
         	if (me->time_sec % 2 ) {
         		Buzz_On();
         	} else {
         		Buzz_Off();
         	}
+        	*/
+
+        	// MPU MPU-9250 addr 1101000 = 68 hex
+        	// read X accel
+        	uint8_t tx_data[8];
+        	uint8_t rx_data[8];
+        	tx_data[0] = '\x3b';
+
+        	HAL_I2C_Master_Transmit(&hi2c2, 0x68 << 1, tx_data , 1, 10);
+        	HAL_I2C_Master_Receive(&hi2c2, 0x68 << 1, rx_data , 1, 10);
+
+        	Digit_Number(rx_data[0]);
 
             status = Q_HANDLED();
             break;
