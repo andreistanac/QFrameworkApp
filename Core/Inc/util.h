@@ -17,6 +17,8 @@ void Digit_Number(uint16_t number);
 void Digit_NumberPos(uint8_t number, uint8_t pos);
 void Digit_SymolPos(uint8_t value, uint8_t pos);
 
+void Matrix_Update(uint16_t data);
+
 void Buzz_On(void);
 
 void Buzz_Off(void);

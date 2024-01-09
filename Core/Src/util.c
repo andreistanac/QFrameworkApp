@@ -90,6 +90,40 @@ static void Digit_Update(uint16_t data) {
 	HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_RESET);
 }
 
+void Matrix_Update(uint16_t data) {
+	uint32_t  j = 16;
+
+	HAL_GPIO_WritePin(MTRX_CCLK_GPIO_Port, MTRX_CCLK_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MTRX_CCLK_GPIO_Port, MTRX_CCLK_Pin, GPIO_PIN_SET);
+
+	// negative reset pulse
+	HAL_GPIO_WritePin(MTRX_LRST_GPIO_Port, MTRX_LRST_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MTRX_LRST_GPIO_Port, MTRX_LRST_Pin, GPIO_PIN_SET);
+
+	while (j--) { // while(data) -- BAD!!!!
+
+		  // set data bit
+		  if (data & 0x8000) {
+			  HAL_GPIO_WritePin(SDI_GPIO_Port, SDI_Pin, GPIO_PIN_SET);
+		  } else {
+			  HAL_GPIO_WritePin(SDI_GPIO_Port, SDI_Pin, GPIO_PIN_RESET);
+		  }
+
+		  // clock pulse
+		  HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_SET);
+
+		  HAL_GPIO_WritePin(SCK_GPIO_Port, SCK_Pin, GPIO_PIN_RESET);
+
+		  data <<= 1;
+	}
+
+	// positive update (write) pulse
+	HAL_GPIO_WritePin(MTRX_CS_GPIO_Port, MTRX_CS_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(MTRX_CS_GPIO_Port, MTRX_CS_Pin, GPIO_PIN_RESET);
+
+
+}
+
 void Buzz_On(void) {
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
 }

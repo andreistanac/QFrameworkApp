@@ -55,12 +55,48 @@ QState actorA_initial(actorA_t * const me, QEvt const * const e) {
     return Q_TRAN(&actorA_S00);
 }
 
+uint16_t mtrx_buffA[] ={
+		0x0000,
+		0x071C,
+		0x0404,
+		0x0514,
+		0x0404,
+		0x071C,
+		0x0000,
+
+		0x0000,
+		0x0000,
+		0x0000,
+
+};
+
+uint16_t mtrx_buffB[] ={
+		0x0000,
+		0x071C,
+		0x0404,
+		0x0404,
+		0x0404,
+		0x071C,
+		0x0000,
+
+		0x0000,
+		0x0000,
+		0x0000,
+
+};
+
+uint16_t * mtrx_buff = mtrx_buffA;
+
 QState actorA_S00(actorA_t * const me, QEvt const * const e) {
     QState status;
     switch (e->sig) {
         case Q_ENTRY_SIG: {
         	Digit_Number(me->cnt);
             status = Q_HANDLED();
+
+            // HAL_GPIO_WritePin(MTRX_CRST_GPIO_Port, MTRX_CRST_Pin, SET);
+            // HAL_GPIO_WritePin(MTRX_CRST_GPIO_Port, MTRX_CRST_Pin, RESET);
+
             break;
         }
         case TIMEOUT_SIG: {
@@ -94,6 +130,8 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         case TIMEOUT_SIG1: {
         	uint8_t rot = Rot_Read();
 
+        	static uint8_t mtrx_cntr = 0, mtrx_idx = 0;
+
         	static uint8_t btn_prev, btn;
 
         	btn = HAL_GPIO_ReadPin(ROTB_GPIO_Port, ROTB_Pin);
@@ -113,7 +151,24 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         	    QActive_post_((QActive *)me, ev, QF_NO_MARGIN, NULL);
         	}
 
-            status = Q_HANDLED();
+       		Matrix_Update(mtrx_buff[(mtrx_idx)%10]);
+
+        	mtrx_idx ++;
+        	if (mtrx_idx == 10) {
+
+        		mtrx_idx = 0;
+        	}
+
+        	mtrx_cntr ++;
+        	if (mtrx_cntr == 200) {
+
+        		mtrx_cntr = 0;
+        		mtrx_idx = 0;
+
+        		mtrx_buff = (mtrx_buff == mtrx_buffA) ? mtrx_buffB : mtrx_buffA;
+        	}
+
+        	status = Q_HANDLED();
             break;
         }
 
@@ -132,7 +187,8 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         case ROT_UP_SIG: {
         	if (me->cnt < 99) {
         		me->cnt++;
-        		Digit_Number(me->cnt);
+        		// Digit_Number(me->cnt);
+
         	}
             status = Q_HANDLED();
             break;
@@ -141,7 +197,8 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         case ROT_DN_SIG: {
         	if (me->cnt > 0) {
         		me->cnt--;
-        		Digit_Number(me->cnt);
+        		// Digit_Number(me->cnt);
+
         	}
             status = Q_HANDLED();
             break;
