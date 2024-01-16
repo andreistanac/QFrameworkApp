@@ -63,7 +63,6 @@ uint16_t mtrx_buffA[] ={
 		0x0404,
 		0x071C,
 		0x0000,
-
 		0x0000,
 		0x0000,
 		0x0000,
@@ -78,12 +77,38 @@ uint16_t mtrx_buffB[] ={
 		0x0404,
 		0x071C,
 		0x0000,
-
 		0x0000,
 		0x0000,
 		0x0000,
 
 };
+
+uint16_t mtrx_buffC[] ={
+		0x0E04,
+		0x040A,
+		0x0402,
+		0x0402,
+		0x0402,
+		0x040A,
+		0x0E04,
+	0x0000,
+	0x0000,
+	0x0000,
+};
+
+uint16_t mtrx_buffD[] ={
+		0x0E04,
+		0x040A,
+		0x040A,
+		0x040A,
+		0x040E,
+		0x040A,
+		0x0E0A,
+	0x0000,
+	0x0000,
+	0x0000,
+};
+
 
 uint16_t * mtrx_buff = mtrx_buffA;
 
@@ -115,12 +140,15 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         	// read X accel
         	uint8_t tx_data[8];
         	uint8_t rx_data[8];
-        	tx_data[0] = '\x3b';
+        	tx_data[0] = '\x41';
 
         	HAL_I2C_Master_Transmit(&hi2c2, 0x68 << 1, tx_data , 1, 10);
-        	HAL_I2C_Master_Receive(&hi2c2, 0x68 << 1, rx_data , 1, 10);
+        	HAL_I2C_Master_Receive(&hi2c2, 0x68 << 1, rx_data , 2, 10);
 
-        	Digit_Number(rx_data[0]);
+        	int temperature = (rx_data[1] | (((int)rx_data[0]) << 8))/321. + 21;
+
+        	Digit_Number(temperature);
+
         	// TBD : value 0...255 printed on digits 0 ... 99 !
 
             status = Q_HANDLED();
@@ -131,9 +159,7 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         	uint8_t rot = Rot_Read();
 
         	static uint8_t mtrx_cntr = 0, mtrx_idx = 0;
-
         	static uint8_t btn_prev, btn;
-
         	btn = HAL_GPIO_ReadPin(ROTB_GPIO_Port, ROTB_Pin);
 
         	if (btn ^ btn_prev) {
@@ -151,22 +177,20 @@ QState actorA_S00(actorA_t * const me, QEvt const * const e) {
         	    QActive_post_((QActive *)me, ev, QF_NO_MARGIN, NULL);
         	}
 
+        	mtrx_cntr ++;
+        	if (mtrx_cntr == 200) {
+        		mtrx_cntr = 0;
+        		mtrx_idx = 0;
+        		mtrx_buff = (mtrx_buff == mtrx_buffC) ? mtrx_buffD : mtrx_buffC;
+        	}
+
        		Matrix_Update(mtrx_buff[(mtrx_idx)%10]);
 
         	mtrx_idx ++;
         	if (mtrx_idx == 10) {
-
         		mtrx_idx = 0;
         	}
 
-        	mtrx_cntr ++;
-        	if (mtrx_cntr == 200) {
-
-        		mtrx_cntr = 0;
-        		mtrx_idx = 0;
-
-        		mtrx_buff = (mtrx_buff == mtrx_buffA) ? mtrx_buffB : mtrx_buffA;
-        	}
 
         	status = Q_HANDLED();
             break;
